@@ -139,6 +139,7 @@ void MSG_WriteBits( msg_t *msg, int value, int bits ) {
 	if ( bits < 0 ) {
 		bits = -bits;
 	}
+    // 不够用了
 	if (msg->oob) {
 		if(bits==8)
 		{
@@ -165,10 +166,12 @@ void MSG_WriteBits( msg_t *msg, int value, int bits ) {
 	} else {
 //		fp = fopen("c:\\netchan.bin", "a");
 		value &= (0xffffffff>>(32-bits));
+        // 取 bits 低三位
 		if (bits&7) {
 			int nbits;
 			nbits = bits&7;
 			for(i=0;i<nbits;i++) {
+                // 一位一位地放进去
 				Huff_putBit((value&1), msg->data, &msg->bit);
 				value = (value>>1);
 			}
@@ -181,6 +184,7 @@ void MSG_WriteBits( msg_t *msg, int value, int bits ) {
 				value = (value>>8);
 			}
 		}
+        // cursize 增加一个字节
 		msg->cursize = (msg->bit>>3)+1;
 //		fclose(fp);
 	}
