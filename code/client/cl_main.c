@@ -3002,6 +3002,7 @@ void CL_Frame ( int msec ) {
 
 	// if we haven't gotten a packet in a long time,
 	// drop the connection
+    // 超时断开链接
 	CL_CheckTimeout();
 
 	// send intentions now

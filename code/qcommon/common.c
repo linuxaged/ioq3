@@ -2798,6 +2798,7 @@ void Com_Init( char *commandLine ) {
 	// set com_frameTime so that if a map is started on the
 	// command line it will still be able to count on com_frameTime
 	// being random enough for a serverid
+    // 获取当前系统时间
 	com_frameTime = Com_Milliseconds();
 
 	// add + commands from command line
@@ -3073,28 +3074,32 @@ void Com_Frame( void ) {
 	// main event loop
 	//
 	if ( com_speeds->integer ) {
+        // 没什么用, 打印出来参考
 		timeBeforeFirstEvents = Sys_Milliseconds ();
 	}
 
 	// Figure out how much time we have
+    // 是否为 demo 模式
 	if(!com_timedemo->integer)
 	{
+        // 是否为单机模式
 		if(com_dedicated->integer)
 			minMsec = SV_FrameMsec();
 		else
 		{
+            // 窗口最小化
 			if(com_minimized->integer && com_maxfpsMinimized->integer > 0)
 				minMsec = 1000 / com_maxfpsMinimized->integer;
 			else if(com_unfocused->integer && com_maxfpsUnfocused->integer > 0)
 				minMsec = 1000 / com_maxfpsUnfocused->integer;
 			else if(com_maxfps->integer > 0)
-				minMsec = 1000 / com_maxfps->integer;
+				minMsec = 1000 / com_maxfps->integer; // 100 / 85 = 11
 			else
 				minMsec = 1;
-			
-			timeVal = com_frameTime - lastTime;
-			bias += timeVal - minMsec;
-			
+			// FIXME2 这是什么意思
+			timeVal = com_frameTime - lastTime; // 这里的 com_frameTime 为初始化时获得的系统时间
+			bias += timeVal - minMsec; // 距离上次 loop 时间, 去掉一帧的时间
+			// 距离上次 loop 时间如果大于一帧时间, 纠正一下
 			if(bias > minMsec)
 				bias = minMsec;
 			
@@ -3125,12 +3130,12 @@ void Com_Frame( void ) {
 		else
 			NET_Sleep(timeVal - 1);
 	} while(Com_TimeVal(minMsec));
-	
+	// 记录时间, 进行网络事件 loop
 	lastTime = com_frameTime;
 	com_frameTime = Com_EventLoop();
-	
+	// 计算这次网络时间花掉的时间
 	msec = com_frameTime - lastTime;
-
+    // 执行一些 command 命令
 	Cbuf_Execute ();
 
 	if (com_altivec->modified)
@@ -3140,6 +3145,7 @@ void Com_Frame( void ) {
 	}
 
 	// mess with msec if needed
+    // 时间太离谱的话要修正
 	msec = Com_ModifyMsec(msec);
 
 	//
@@ -3211,6 +3217,7 @@ void Com_Frame( void ) {
 
 		all = timeAfter - timeBeforeServer;
 		sv = timeBeforeEvents - timeBeforeServer;
+        //
 		ev = timeBeforeServer - timeBeforeFirstEvents + timeBeforeClient - timeBeforeEvents;
 		cl = timeAfter - timeBeforeClient;
 		sv -= time_game;

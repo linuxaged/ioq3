@@ -648,7 +648,9 @@ int main( int argc, char **argv )
 
 	while( 1 )
 	{
+        // 输入事件处理
 		IN_Frame( );
+        // C/S之间通讯
 		Com_Frame( );
 	}
 
