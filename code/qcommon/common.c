@@ -2163,17 +2163,19 @@ int Com_EventLoop( void ) {
 
 	while ( 1 ) {
 		ev = Com_GetEvent();
-
+        printf("evTime = %d\n", ev.evTime);
 		// if no more events are available
 		if ( ev.evType == SE_NONE ) {
 			// manually send packet events for the loopback channel
 			while ( NET_GetLoopPacket( NS_CLIENT, &evFrom, &buf ) ) {
+                printf("True");
 				CL_PacketEvent( evFrom, &buf );
 			}
 
 			while ( NET_GetLoopPacket( NS_SERVER, &evFrom, &buf ) ) {
 				// if the server just shut down, flush the events
-				if ( com_sv_running->integer ) {
+				printf("False");
+                if ( com_sv_running->integer ) {
 					Com_RunAndTimeServerPacket( &evFrom, &buf );
 				}
 			}
@@ -2971,6 +2973,8 @@ void Com_WriteConfig_f( void ) {
 /*
 ================
 Com_ModifyMsec
+
+ 和 clampTime 比较, 不能超过 clampTime.
 ================
 */
 int Com_ModifyMsec( int msec ) {
@@ -2982,7 +2986,7 @@ int Com_ModifyMsec( int msec ) {
 	if ( com_fixedtime->integer ) {
 		msec = com_fixedtime->integer;
 	} else if ( com_timescale->value ) {
-		msec *= com_timescale->value;
+		msec *= com_timescale->value;//
 	} else if (com_cameraMode->integer) {
 		msec *= com_timescale->value;
 	}
@@ -3099,7 +3103,7 @@ void Com_Frame( void ) {
 			// FIXME2 这是什么意思
 			timeVal = com_frameTime - lastTime; // 这里的 com_frameTime 为初始化时获得的系统时间
 			bias += timeVal - minMsec; // 距离上次 loop 时间, 去掉一帧的时间
-			// 距离上次 loop 时间如果大于一帧时间, 纠正一下
+			// 距离上次 loop 的时间如果大于一帧时间, 纠正.
 			if(bias > minMsec)
 				bias = minMsec;
 			
@@ -3132,7 +3136,10 @@ void Com_Frame( void ) {
 	} while(Com_TimeVal(minMsec));
 	// 记录时间, 进行网络事件 loop
 	lastTime = com_frameTime;
-	com_frameTime = Com_EventLoop();
+    // Tracy: 事实上只要获取系统时间
+//	com_frameTime = Com_EventLoop();
+    com_frameTime = Sys_Milliseconds();
+    
 	// 计算这次网络时间花掉的时间
 	msec = com_frameTime - lastTime;
     // 执行一些 command 命令

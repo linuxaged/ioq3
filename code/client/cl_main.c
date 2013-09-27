@@ -3006,7 +3006,8 @@ void CL_Frame ( int msec ) {
 	CL_CheckTimeout();
 
 	// send intentions now
-	CL_SendCmd();
+    // 发送命令
+	CL_SendCmd(); // CL_WritePacket
 
 	// resend a connection request if necessary
 	CL_CheckForResend();

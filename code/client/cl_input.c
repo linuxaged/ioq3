@@ -726,6 +726,7 @@ During normal gameplay, a client packet will contain something like:
 1	command count
 <count * usercmds>
 
+要先弄清楚 和 cl, clc 怎么配合的
 ===================
 */
 void CL_WritePacket( void ) {
@@ -858,6 +859,7 @@ void CL_WritePacket( void ) {
 		key ^= MSG_HashKey(clc.serverCommands[ clc.serverCommandSequence & (MAX_RELIABLE_COMMANDS-1) ], 32);
 
 		// write all the commands, including the predicted command
+        // 写入所有命令, 包括预测的命令
 		for ( i = 0 ; i < count ; i++ ) {
 			j = (cl.cmdNumber - count + i + 1) & CMD_MASK;
 			cmd = &cl.cmds[j];
